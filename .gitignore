@@ -5,6 +5,10 @@ venv/
 # Ignore data files
 data/*.csv
 
+# Python cache and compiled files
+__pycache__/
+*.pyc
+
 # Ignore Jupyter notebook checkpoints
 .ipynb_checkpoints/
 
