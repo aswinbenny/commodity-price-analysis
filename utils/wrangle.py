@@ -28,6 +28,7 @@ def wrangle(df):
         })
     
     df['Product_Type'] = df['Commodity'] + '|' + df['Variety'] + '|' + df['Grade']
+    df['Year'] = df['Arrival_Date'].dt.year
 
     product_type_counts = df['Product_Type'].value_counts()
     valid_product_types = product_type_counts[product_type_counts > 15].index
@@ -35,7 +36,7 @@ def wrangle(df):
 
     df.drop(columns=['Commodity', 'Variety', 'Grade'], inplace=True)     
 
-    column_order = ['Product_Type', 'Arrival_Date', 'Market', 'Is_VFPCK', 'Season', 'Modal_Price', 'Max_Price', 'Min_Price']
+    column_order = ['Product_Type', 'Arrival_Date', 'Market', 'Is_VFPCK', 'Season', 'Year', 'Modal_Price', 'Max_Price', 'Min_Price']
     df = df[column_order]
 
     df = df.sort_values(by=['Product_Type', 'Arrival_Date', 'Market']).reset_index(drop=True)
