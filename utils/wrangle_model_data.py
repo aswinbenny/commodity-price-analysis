@@ -30,13 +30,13 @@ def wrangle(df):
     df['Product_Type'] = df['Commodity'] + '|' + df['Variety'] + '|' + df['Grade']
 
     market_counts = df.groupby("Market")["Modal_Price"].count()
-    #valid_markets = market_counts[market_counts > 500].index
-    # df = df[df['Market'].isin(valid_markets)]
+    valid_markets = market_counts[market_counts > 500].index
+    df = df[df['Market'].isin(valid_markets)]
     
     df['Year'] = df['Arrival_Date'].dt.year
      # ensure 3 unique years per product/market
-    # valid_years = df.groupby(['Product_Type', 'Market'])['Year'].transform('nunique') == 3
-    # df = df[valid_years]
+    valid_years = df.groupby(['Product_Type', 'Market'])['Year'].transform('nunique') == 3
+    df = df[valid_years]
 
     product_type_counts = df['Product_Type'].value_counts()
     valid_product_types = product_type_counts[product_type_counts > 15].index
