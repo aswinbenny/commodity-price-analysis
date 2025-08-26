@@ -42,7 +42,7 @@ def wrangle(df):
     valid_product_types = product_type_counts[product_type_counts > 15].index
     df = df[df['Product_Type'].isin(valid_product_types)]
 
-    df.drop(columns=['Commodity', 'Variety', 'Grade'], inplace=True)     
+    df.drop(columns=['Variety', 'Grade'], inplace=True)     
 
     column_order = ['Product_Type', 'Arrival_Date', 'Market', 'Is_VFPCK', 'Season', 'Year', 'Modal_Price', 'Max_Price', 'Min_Price']
     df = df[column_order]

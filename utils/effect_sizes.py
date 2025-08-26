@@ -1,6 +1,6 @@
 import numpy as np
 
-def compute_effect_sizes_by_group(df, group_cols = ['Season', 'Market', 'Year']):
+def compute_effect_sizes_by_group(df, group_cols = ['Season', 'Market', 'Year', 'Commodity']):
     for group_col in group_cols:
 
         for product, group in df.groupby('Product_Type'):   
