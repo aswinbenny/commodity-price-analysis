@@ -12,14 +12,21 @@ def assign_season(date):
         return 'Winter'
 
 def wrangle(df):
+
+    df['Product_Type'] = df['Commodity'] + '|' + df['Variety'] + '|' + df['Grade']
+    df['Variety_Type'] = df['Commodity'] + '|' + df['Variety']
+
+    grp = df.groupby(['Product_Type', 'Market']).agg({'Arrival_Date': 'count'}).reset_index()
+    products = grp[grp['Arrival_Date']>50][['Product_Type', 'Market']]
+    df = df.merge(products, on=['Product_Type', 'Market'], how='inner')
+
     df['Arrival_Date'] = pd.to_datetime(df['Arrival_Date'], format='%d/%m/%Y')
     df[['Max_Price', 'Modal_Price']] = df[['Max_Price', 'Modal_Price']].astype(float)
 
-    df['Is_VFPCK'] = df['Market'].str.contains('VFPCK', case=False)
-    df['Season'] = df['Arrival_Date'].apply(assign_season)
+    
 
     df = df.groupby(
-        ['Commodity', 'Variety', 'Grade', 'Arrival_Date', 'Market', 'Season', 'Is_VFPCK'],
+        ['Product_Type', 'Commodity', 'Variety_Type', 'Arrival_Date', 'Market'],
         as_index=False
         ).agg({
         'Modal_Price': 'mean',
@@ -27,27 +34,19 @@ def wrangle(df):
         'Min_Price': 'mean'
         })
     
-    df['Product_Type'] = df['Commodity'] + '|' + df['Variety'] + '|' + df['Grade']
-    df['Variety_Type'] = df['Commodity'] + '|' + df['Variety']
-
-
-    market_counts = df.groupby("Market")["Modal_Price"].count()
-    #valid_markets = market_counts[market_counts > 500].index
-    # df = df[df['Market'].isin(valid_markets)]
-    
+    df['Is_VFPCK'] = df['Market'].str.contains('VFPCK', case=False)
+    df['Season'] = df['Arrival_Date'].apply(assign_season)
     df['Year'] = df['Arrival_Date'].dt.year
-     # ensure 3 unique years per product/market
-    # valid_years = df.groupby(['Product_Type', 'Market'])['Year'].transform('nunique') == 3
-    # df = df[valid_years]
+     
 
-    product_type_counts = df['Product_Type'].value_counts()
-    valid_product_types = product_type_counts[product_type_counts > 15].index
-    df = df[df['Product_Type'].isin(valid_product_types)]
+    # product_type_counts = df['Product_Type'].value_counts()
+    # valid_product_types = product_type_counts[product_type_counts > 15].index
+    # df = df[df['Product_Type'].isin(valid_product_types)]
 
-    df.drop(columns=['Variety', 'Grade'], inplace=True)     
+    # df.drop(columns=['Variety', 'Grade'], inplace=True)     
 
     column_order = ['Product_Type', 'Commodity', 'Variety_Type', 'Arrival_Date', 'Market', 'Is_VFPCK', 'Season', 'Year', 'Modal_Price', 'Max_Price', 'Min_Price']
     df = df[column_order]
 
-    df = df.sort_values(by=['Product_Type', 'Arrival_Date', 'Market']).reset_index(drop=True)
+    df = df.sort_values(by=['Product_Type', 'Market', 'Arrival_Date']).reset_index(drop=True)
     return df

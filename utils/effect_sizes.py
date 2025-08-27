@@ -1,4 +1,5 @@
 import numpy as np
+import pandas as pd
 
 def compute_effect_sizes_by_group(df, group_cols = ['Season', 'Market', 'Year']):
     for group_col in group_cols:
@@ -43,5 +44,19 @@ def compute_effect_sizes_by_commodity(df, group_cols=['Commodity', 'Variety_Type
             df.loc[group.index, f'eta2_{group_col}'] = eta2
             df.loc[group.index, f'omega2_{group_col}'] = omega2
     return df
+
+def compare_eta_omega(df, features = ['Commodity', 'Variety_Type', 'Season', 'Market', 'Year'], absolute_differnece_threshold=0.1, ratio_threshold=1.5):
+    results = []
+    for feature in features:    
+        df[f'eta2-omega2_diff_{feature}'] = df[f'eta2_{feature}'] - df[f'omega2_{feature}']
+        df[f'eta2/omega2_ratio_{feature}'] = df[f'eta2_{feature}'] / (df[f'omega2_{feature}'] + 1e-9)
+        suspicious = df[(df[f'eta2-omega2_diff_{feature}'] > absolute_differnece_threshold) & (df[f'eta2/omega2_ratio_{feature}'] > ratio_threshold)].copy()
+        suspicious['feature_flagged'] = feature
+        results.append(suspicious)
+    if results:
+        suspicious_df = pd.concat(results)
+    else:
+        suspicious_df = pd.DataFrame()
+    return suspicious_df
         
 
