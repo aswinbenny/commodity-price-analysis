@@ -1,5 +1,6 @@
 import pandas as pd
 import matplotlib.pyplot as plt
+import matplotlib.dates as mdates
 
 def select_exemplars(df_grouped): 
     representative_exemplars = {}
@@ -49,10 +50,12 @@ def time_series_extractor(df, feature, representative_exemplars, high_volume_exe
 
 
 def plot_time_series(modal_price, title="Modal Price Trend"):
-    plt.figure(figsize=(12, 6))
+    plt.figure(figsize=(24,10))
     plt.plot(modal_price, marker='o')
     plt.title(title)
     plt.xlabel('Date')
     plt.ylabel('Price')
+    plt.gca().xaxis.set_major_locator(mdates.MonthLocator())       # tick every month
+    plt.gca().xaxis.set_major_formatter(mdates.DateFormatter('%b %Y'))  # format: "Jan 2025"
     plt.grid(True)
     plt.show()
