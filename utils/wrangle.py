@@ -9,7 +9,7 @@ def assign_season(date):
         return 'Southwest Monsoon'
     elif month in [9, 10, 11]:
         return 'Post Monsoon'
-    else:  # Dec, Jan
+    else:
         return 'Winter'
 
 def wrangle(df):
@@ -23,6 +23,7 @@ def wrangle(df):
 
     df['Arrival_Date'] = pd.to_datetime(df['Arrival_Date'], format='%d/%m/%Y')
     df[['Max_Price', 'Modal_Price']] = df[['Max_Price', 'Modal_Price']].astype(float)
+
 
     df = df.groupby(
         ['Product_Type', 'Commodity', 'Variety_Type', 'Arrival_Date', 'Market'],
