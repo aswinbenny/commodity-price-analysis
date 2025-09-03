@@ -15,6 +15,7 @@ def assign_season(date):
 def wrangle(df):
 
     df['Product_Type'] = df['Commodity'] + '|' + df['Variety'] + '|' + df['Grade']
+    df['Product_Type'] = df['Product_Type'].str.replace('/', '_', regex=False)
     df['Variety_Type'] = df['Commodity'] + '|' + df['Variety']
 
     grp = df.groupby(['Product_Type', 'Market']).agg({'Arrival_Date': 'count'}).reset_index()

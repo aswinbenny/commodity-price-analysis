@@ -18,3 +18,6 @@ Thumbs.db
 
 # Ignore VSCode settings (optional)
 .vscode/
+
+# Ignore pickled models
+models

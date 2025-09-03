@@ -1,3 +1,13 @@
+"""Filtering Sparse Groups
+
+We analyzed the number of observations per Commodity - Market group across the train, validation, and test periods.  
+
+- Groups with **insufficient data** (train ≤ 100, validation ≤ 10, test ≤ 5) were removed.  
+- This ensures that classical time series models (SARIMA/Prophet) and ML models have enough historical points to learn patterns and be evaluated reliably.  
+
+Result: 109 sparse groups were excluded. Remaining groups have sufficient data for modeling.
+"""
+
 class DataSplitter:
 
     def __init__(self, df, date_dict: dict, thresholds: dict):
