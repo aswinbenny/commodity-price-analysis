@@ -26,7 +26,7 @@ def compute_effect_sizes_by_group(df, group_cols = ['Season', 'Market', 'Year'])
 
 def compute_effect_sizes_by_commodity(df, group_cols=['Commodity', 'Variety_Type']):
     for group_col in group_cols:
-        for commodity, group in df.groupby(group_col):
+        for _, group in df.groupby(group_col):
             group['Log_Modal_Price'] = group['Modal_Price'].apply(lambda x: np.log(x) if x > 0 else np.nan)
             prices = [grp['Log_Modal_Price'].values for _, grp in group.groupby('Product_Type')]
             mean_prices = [np.mean(p) for p in prices]
