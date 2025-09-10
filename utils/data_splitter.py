@@ -1,6 +1,3 @@
-#Filtering Sparse Groups
-
-
 class DataSplitter:
 
     def __init__(self, df, date_dict: dict, thresholds: dict):

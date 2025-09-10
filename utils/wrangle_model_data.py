@@ -1,4 +1,5 @@
 import pandas as pd
+import numpy as np
 
 def assign_season(date):
     month = date.month
@@ -8,44 +9,54 @@ def assign_season(date):
         return 'Southwest Monsoon'
     elif month in [9, 10, 11]:
         return 'Post Monsoon'
-    else:  # Dec, Jan
+    else:
         return 'Winter'
 
-def wrangle(df):
-    df['Arrival_Date'] = pd.to_datetime(df['Arrival_Date'], format='%d/%m/%Y')
-    df[['Max_Price', 'Modal_Price']] = df[['Max_Price', 'Modal_Price']].astype(float)
+def wrangle_ml(df):
+   
+    df['Product_Type'] = df['Commodity'] + '|' + df['Variety'] + '|' + df['Grade']
+    df['Product_Type'] = df['Product_Type'].str.replace('/', '_', regex=False)
 
-    df['Is_VFPCK'] = df['Market'].str.contains('VFPCK', case=False)
-    df['Season'] = df['Arrival_Date'].apply(assign_season)
+    df['Arrival_Date'] = pd.to_datetime(df['Arrival_Date'], format='%d/%m/%Y')
+    df['Modal_Price'] = df['Modal_Price'].astype(float)
+    df['log_Modal_Price'] = np.log1p(df['Modal_Price'])
+ 
+    df = df.drop(columns =['State', 'District', 'Commodity', 'Variety',	'Grade', 'Min_Price', 'Max_Price', 'Commodity_Code'])
 
     df = df.groupby(
-        ['Commodity', 'Variety', 'Grade', 'Arrival_Date', 'Market', 'Season', 'Is_VFPCK'],
+        ['Product_Type', 'Arrival_Date', 'Market'],
         as_index=False
         ).agg({
         'Modal_Price': 'mean',
-        'Max_Price': 'mean',
-        'Min_Price': 'mean'
         })
-    
-    df['Product_Type'] = df['Commodity'] + '|' + df['Variety'] + '|' + df['Grade']
 
-    market_counts = df.groupby("Market")["Modal_Price"].count()
-    valid_markets = market_counts[market_counts > 500].index
-    df = df[df['Market'].isin(valid_markets)]
+    dfs = []
+    for (prod, market), group in df.groupby(['Product_Type', 'Market']):
+        group = group.set_index('Arrival_Date').reindex(
+            pd.date_range(group['Arrival_Date'].min(), group['Arrival_Date'].max())
+        )
+        group['Product_Type'] = prod
+        group['Market'] = market
+        group['log_Modal_Price_filled'] = np.log1p(group['Modal_Price']).ffill(limit=3).interpolate()
+
+        for lag in [1,3,7,14,30]:
+            group[f'lag_{lag}'] = group['log_Modal_Price_filled'].shift(lag)
+        
+        for w in [3,7,14]:
+            group[f'rolling_mean_{w}'] = group['log_Modal_Price_filled'].rolling(w, min_periods=1).mean()
+            group[f'rolling_std_{w}'] = group['log_Modal_Price_filled'].rolling(w, min_periods=1).std()
+
+        dfs.append(group)
+
+    df = pd.concat(dfs).reset_index().rename(columns={'index': 'Arrival_Date'})
+
+
     
+    df['Commodity'] = df['Product_Type'].apply(lambda x: x.split('|')[0])
+    df['Variety_Type'] = df['Product_Type'].apply(lambda x: '|'.join(x.split('|')[:2]))
+    df['Is_VFPCK'] = df['Market'].str.contains('VFPCK', case=False)
+    df['Season'] = df['Arrival_Date'].apply(assign_season)
     df['Year'] = df['Arrival_Date'].dt.year
-     # ensure 3 unique years per product/market
-    valid_years = df.groupby(['Product_Type', 'Market'])['Year'].transform('nunique') == 3
-    df = df[valid_years]
 
-    product_type_counts = df['Product_Type'].value_counts()
-    valid_product_types = product_type_counts[product_type_counts > 15].index
-    df = df[df['Product_Type'].isin(valid_product_types)]
-
-    df.drop(columns=['Variety', 'Grade'], inplace=True)     
-
-    column_order = ['Product_Type', 'Arrival_Date', 'Market', 'Is_VFPCK', 'Season', 'Year', 'Modal_Price', 'Max_Price', 'Min_Price']
-    df = df[column_order]
-
-    df = df.sort_values(by=['Product_Type', 'Arrival_Date', 'Market']).reset_index(drop=True)
+    df = df.sort_values(by=['Product_Type', 'Market', 'Arrival_Date']).reset_index(drop=True)
     return df
