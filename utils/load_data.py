@@ -9,7 +9,7 @@ def load_data(file_path):
     file_path (str): Path to the CSV file containing commodity prices.
     
     Returns:
-    pd.DataFrame: Preprocessed DataFrame ready for EDA.
+    pd.DataFrame: Preprocessed DataFrame ready for EDA and time series modelling.
     """
     df = pd.read_csv(file_path)
     df = wrangle(df)
