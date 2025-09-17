@@ -11,6 +11,19 @@ The analysis covers how **season, market, year, commodity, and variety** affect 
 
 The repository contains **reproducible notebooks** and utility modules, organized to progressively take a user from exploratory analysis to predictive modeling:
 
+## Visualization
+
+The **Kerala Commodity Market Explorer** dashboard (built in Tableau) provides an interactive view of the analysis.  
+It includes:  
+
+- Key price drivers (effect size of market, season, commodity, year, variety)  
+- Market-level price map for Ernakulam  
+- Time series of commodity price trends  
+- Seasonal price distribution (Post Monsoon, SW Monsoon, Summer, Winter)  
+- Summary metrics and interactive filters (Market, Product Type, Year)
+
+[Explore the Tableau Dashboard](https://public.tableau.com/views/Keralaagriculturalcommoditymarketanalysis/KeralaCommodityMarketExplorer?:language=en-US&publish=yes&:sid=&:redirect=auth&:display_count=n&:origin=viz_share_link)
+
 ## Notebooks
 
 1. **EDA (`eda.ipynb`)**  
@@ -148,4 +161,3 @@ This project is released under the **MIT License**
 ## Author
 
 Developed by **Aswin Benny**  
-GitHub: [https://github.com/aswinbenny](https://github.com/aswinbenny)
